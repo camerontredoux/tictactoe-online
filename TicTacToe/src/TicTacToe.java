@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 public class TicTacToe {
     private char status = '\0';
-    private char possibleStatus[] = {'X', 'O'};
+    private char possibleStatus[] = {'X', 'C'};
     private char gameStatus[] = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
     private boolean gameReady = false;
     private Socket socket = null;
