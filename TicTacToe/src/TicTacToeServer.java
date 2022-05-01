@@ -5,8 +5,8 @@ import java.net.Socket;
 public class TicTacToeServer implements Runnable {
 
     private char possibleStatus[] = {'x', 'o'};
-    private char p1status = ' ';
-    private char p2status = ' ';
+    private Character p1status = null;
+    private Character p2status = null;
 
     private char gameStatus[] = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
@@ -111,6 +111,8 @@ public class TicTacToeServer implements Runnable {
             for (int i=0; i<gameStatus.length; i++) {
                 gameStatus[i] = String.valueOf(i+1).toCharArray()[0];   // sorry bro, java is stupid
             }
+            p1status = null;
+            p2status = null;
         }
 
         try {
@@ -121,32 +123,27 @@ public class TicTacToeServer implements Runnable {
     }
 
     private boolean checkGame() {
-        boolean hasWon = false;
-        char winner = '\0';
+        Character winner = null;
         for (int i=0; i<3; i++) {
             // vertical
             if ((gameStatus[i] == gameStatus[i+3]) && (gameStatus[i] == gameStatus[i+6])) {
                 winner = gameStatus[i];
-                hasWon = true;
             }
             // horizontal
             if ((gameStatus[3*i] == gameStatus[(3*i)+1]) && (gameStatus[3*i] == gameStatus[(3*i)+2])) {
                 winner = gameStatus[3*i];
-                hasWon = true;
             }
         }
         // negative slope diagonal
         if ((gameStatus[0] == gameStatus[4]) && (gameStatus[0] == gameStatus[8])) {
             winner = gameStatus[0];
-            hasWon = true;
         }
         // positive slope diagonal
         if ((gameStatus[2] == gameStatus[4]) && (gameStatus[2] == gameStatus[6])) {
             winner = gameStatus[2];
-            hasWon = true;
         }
 
-        if (hasWon) {
+        if (winner != null) {
             writer1.println(winner);
             writer1.flush();
             writer2.println(winner);

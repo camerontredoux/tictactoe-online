@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 
 public class TicTacToe {
-    protected char status = '\0';
+    protected Character status = null;
     protected char gameStatus[] = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
     protected boolean gameReady = false;
     protected boolean playsHaveBeenDone = false;  // for win condition
@@ -109,12 +109,12 @@ public class TicTacToe {
     }
 
     protected void sendPlay(int n) {
-        if (status == '\0') {
+        if (status == null) {
             return;
         }
         if (n < 1 || n > 9 ||
                 gameStatus[n-1] == 'x' || gameStatus[n-1] == 'o') {
-            System.err.println("Invalid play from " + status + " of " + n);
+            System.err.println("Invalid play from " + printStatus() + " of " + n);
             return;
         }
         writer.println(n);
@@ -187,7 +187,7 @@ public class TicTacToe {
         for (int i=0; i<gameStatus.length; i++) {
             gameStatus[i] = String.valueOf(i+1).toCharArray()[0];   // sorry bro, java is stupid
         }
-        status = '\0';
+        status = null;
         playsHaveBeenDone = false;
         gameReady = false;
         try {
@@ -208,6 +208,4 @@ public class TicTacToe {
         }
         serverThread.interrupt();
     }
-
-
 }
