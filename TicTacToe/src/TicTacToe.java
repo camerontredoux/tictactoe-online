@@ -45,7 +45,7 @@ public class TicTacToe {
         Scanner scanner;
         while (true) {
             redrawGame();
-            if (playsHaveBeenDone) {
+            if (gameReady) {
                 System.out.print("player " + printStatus() + "> ");
             }
             scanner = new Scanner(System.in);
@@ -65,6 +65,7 @@ public class TicTacToe {
                     }
                     if (read.equals("done")) {
                         closeServer();
+                        System.exit(0);
                         break;
                     }
                 }
@@ -74,7 +75,7 @@ public class TicTacToe {
 
     protected void redrawGame() {
         if (gameReady) {
-            System.out.println("client> Waiting for other player...");
+            notifyUser("Waiting for other player...");
             updateGame();
         }
         System.out.println(printGame());
@@ -87,18 +88,23 @@ public class TicTacToe {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        if (ans == null) {
+            return;
+//            closeServer();
+//            System.exit(0);
+        }
         iAmPlaying = true;
 
         if (ans.matches(".*\\d.*")) {
             gameStatus[Integer.parseInt(ans) - 1] = (status == 'x' ? 'o' : 'x');
         }
         if (ans.charAt(0) == 'T') {
-            System.out.println("TIE!!!!");
+            notifyUser("TIE!!!!");
             resetGame();
         }
         if (ans.charAt(0) =='x' || ans.charAt(0) == 'o') {
             if (playsHaveBeenDone) {
-                System.out.println("WINNER: " + ans + "!!!!");
+                notifyUser("WINNER: " + printStatus(ans.charAt(0)) + "!!!!");
                 resetGame();
             } else {
                 if (ans.charAt(0) != status) {
@@ -137,7 +143,7 @@ public class TicTacToe {
                     continue;
                 }
                 status = myStatus;
-                System.out.println("You are player " + printStatus());
+                userStatus("You are player " + printStatus());
                 break;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -145,8 +151,20 @@ public class TicTacToe {
         }
     }
 
+    // You are [X/O]
+    protected void userStatus(String s) {
+        System.out.println(s);
+    }
     protected String printStatus() {
-        return String.valueOf(status); //.toUpperCase(Locale.ROOT);
+        return printStatus(status);
+    }
+    protected String printStatus(Character s) {
+        return String.valueOf(s); //.toUpperCase(Locale.ROOT);
+    }
+
+    // State information while playing
+    protected void notifyUser(String s) {
+        System.out.println(s);
     }
 
     protected String printGame() {
@@ -159,7 +177,7 @@ public class TicTacToe {
                 game += ", ";
             }
         }
-        if (status != 'x' && status != 'o') {
+        if (status == null) {
             return "Choose a game to join: [connect ADDR PORT]";
         }
         return "[player " + printStatus() + "] Choose a position to play at:\n" + game;
@@ -181,7 +199,7 @@ public class TicTacToe {
     }
 
     public void resetGame() {
-        for (int i=0; i<4; i++) {
+        for (int i=0; i<3; i++) {
             System.out.println();
         }
         for (int i=0; i<gameStatus.length; i++) {
@@ -201,11 +219,15 @@ public class TicTacToe {
     }
 
     protected void closeServer() {
-        try {
-            socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (socket != null) {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        serverThread.interrupt();
+        if (serverThread != null) {
+           // serverThread.interrupt();
+        }
     }
 }

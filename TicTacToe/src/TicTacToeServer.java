@@ -73,7 +73,12 @@ public class TicTacToeServer implements Runnable {
 
             while (true) { // each individual game
                 try {
-                    int p1play = Integer.parseInt(reader1.readLine());
+                    String p1 = reader1.readLine();
+                    if (p1 == null) {
+//                        serverUp = false;
+                        break;
+                    }
+                    int p1play = Integer.parseInt(p1);
                     System.out.println("server> P1 played: " + p1play);
                     gameStatus[p1play - 1] = p1status;
                     if (checkGame()) {
@@ -82,7 +87,12 @@ public class TicTacToeServer implements Runnable {
                     writer2.println(p1play);
                     writer2.flush();
 
-                    int p2play = Integer.parseInt(reader2.readLine());
+                    String p2 = reader2.readLine();
+                    if (p2 == null) {
+//                        serverUp = false;
+                        break;
+                    }
+                    int p2play = Integer.parseInt(p2);
                     System.out.println("server> P2 played: " + p2play);
                     gameStatus[p2play - 1] = p2status;
                     if (checkGame()) {
