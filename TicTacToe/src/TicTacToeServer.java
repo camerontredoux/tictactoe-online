@@ -30,24 +30,23 @@ public class TicTacToeServer implements Runnable {
     public void run() {
         boolean serverUp = true;
         while (serverUp) { // lifetime of server
-            boolean running = false;
-            while (!running) {
+            while (true) {
                 try {
                     if (socket1 == null) {
                         socket1 = serverSocket.accept();
-                        System.err.println("Player 1 accepts " + socket1);
+                        System.err.println("server> Player 1 accepts " + socket1);
 
                     }
                     if (socket2 == null) {
                         socket2 = serverSocket.accept();
-                        System.err.println("Player 2 accepts " + socket2);
+                        System.err.println("server> Player 2 accepts " + socket2);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 if (socket1 != null && socket2 != null) {
-                    running = true;
                     System.err.println("server> Found 2 players");
+                    break;
                 }
             }
 
@@ -72,10 +71,10 @@ public class TicTacToeServer implements Runnable {
             writer2.println(p1status);
             writer2.flush();
 
-            while (running) { // each individual game
+            while (true) { // each individual game
                 try {
                     int p1play = Integer.parseInt(reader1.readLine());
-                    //System.out.println("server> P1: " + p1play);
+                    System.out.println("server> P1 played: " + p1play);
                     gameStatus[p1play - 1] = p1status;
                     if (checkGame()) {
                         break;
@@ -84,7 +83,7 @@ public class TicTacToeServer implements Runnable {
                     writer2.flush();
 
                     int p2play = Integer.parseInt(reader2.readLine());
-                    //System.out.println("server> P2: " + p2play);
+                    System.out.println("server> P2 played: " + p2play);
                     gameStatus[p2play - 1] = p2status;
                     if (checkGame()) {
                         break;
@@ -97,7 +96,6 @@ public class TicTacToeServer implements Runnable {
                 }
             }
             System.out.println("server> New Game");
-            running = false;
             writer1 = null;
             writer2 = null;
             reader1 = null;
