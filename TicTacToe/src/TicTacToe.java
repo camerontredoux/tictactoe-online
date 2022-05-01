@@ -1,11 +1,15 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.Locale;
 import java.util.Scanner;
+
 
 public class TicTacToe {
     private char status = '\0';
     private char gameStatus[] = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
     private boolean gameReady = false;
+    private boolean playsHaveBeenDone = false;  // for win condition
+    private boolean iAmPlaying = true;
     private Socket socket = null;
     private BufferedReader reader;
     private PrintWriter writer;
@@ -17,9 +21,16 @@ public class TicTacToe {
         Scanner scanner;
         gameReady = false;
         while (true) {
+            if (gameReady) {
+                System.out.println("client> Waiting for other player...");
+                updateGame();
+            }
             System.out.println(printGame());
             scanner = new Scanner(System.in);
-            if (scanner.hasNextLine()) {
+            if (playsHaveBeenDone) {
+                System.out.print("player " + printStatus() + "> ");
+            }
+            if (iAmPlaying && scanner.hasNextLine()) {
                 String read = scanner.nextLine();
                 if (!read.isEmpty()) {
                     if (read.equals("start")) {
@@ -30,7 +41,8 @@ public class TicTacToe {
                     }
                     if (read.matches(".*\\d.*")) {
                         sendPlay(Integer.parseInt(read));
-                        gameReady = true;
+//                        gameReady = true;
+                        playsHaveBeenDone = true;
                     }
                     if (read.equals("done")) {
                         serverThread.interrupt();
@@ -44,10 +56,6 @@ public class TicTacToe {
                     }
                 }
             }
-
-            if (gameReady) {
-                updateGame();
-            }
         }
     }
 
@@ -58,11 +66,38 @@ public class TicTacToe {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("[Client " + status + "] received " + ans);
+        //System.out.println("client> from server: " + ans);
+        iAmPlaying = true;
+
+        if (ans.matches(".*\\d.*")) {
+            gameStatus[Integer.parseInt(ans) - 1] = (status == 'x' ? 'o' : 'x');
+        }
+        if (ans.charAt(0) == 'T') {
+            System.out.println("TIE!!!!");
+            resetGame();
+        }
+        if (ans.charAt(0) =='x' || ans.charAt(0) == 'o') {
+            //System.out.println("Checking for win condiiton");
+            if (playsHaveBeenDone) {
+                System.out.println("WINNER: " + ans + "!!!!");
+                resetGame();
+            } else {
+                if (ans.charAt(0) != status) {
+                    iAmPlaying = false;
+                    //System.out.println("I'm not playing yet");
+                    return;
+                }
+            }
+        }
+
     }
 
     private void sendPlay(int n) {
-        if (n < 1 || n > 9) {
+        if (status == '\0') {
+            return;
+        }
+        if (n < 1 || n > 9 ||
+                gameStatus[n-1] == 'x' || gameStatus[n-1] == 'o') {
             System.err.println("Invalid play from " + status + " of " + n);
             return;
         }
@@ -75,6 +110,10 @@ public class TicTacToe {
     public char getStatus() {
         return status;
     }
+    private String printStatus() {
+        return String.valueOf(status); //.toUpperCase(Locale.ROOT);
+    }
+
 
     @Override
     public String toString() {
@@ -92,7 +131,7 @@ public class TicTacToe {
             try {
                 String ans = reader.readLine();
                 char myStatus = ans.charAt(0);
-                if (!(myStatus == 'X' || myStatus == 'O')) {
+                if (!(myStatus == 'x' || myStatus == 'o')) {
                     continue;
                 }
                 System.out.println("Found status " + ans);
@@ -114,10 +153,29 @@ public class TicTacToe {
                 game += ", ";
             }
         }
-        if (status != 'X' && status != 'O') {
+        if (status != 'x' && status != 'o') {
             return "Choose a game to join: [connect ADDR PORT]";
         }
         return "[player " + status + "] Choose a position to play at:\n" + game;
+    }
+    private void resetGame() {
+        for (int i=0; i<4; i++) {
+            System.out.println();
+        }
+        for (int i=0; i<gameStatus.length; i++) {
+            gameStatus[i] = String.valueOf(i+1).toCharArray()[0];   // sorry bro, java is stupid
+        }
+        status = '\0';
+        playsHaveBeenDone = false;
+        gameReady = false;
+        try {
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        socket = null;
+        reader = null;
+        writer = null;
     }
     private void startServer() {
         serverThread = new Thread(new TicTacToeServer());
@@ -138,6 +196,7 @@ public class TicTacToe {
             }
         }
         determineStatus();
+        gameReady = true;
     }
 
     public static void main(String[] args) {
