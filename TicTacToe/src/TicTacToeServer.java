@@ -75,7 +75,7 @@ public class TicTacToeServer implements Runnable {
                 try {
                     String p1 = reader1.readLine();
                     if (p1 == null) {
-//                        serverUp = false;
+                        playerLeft();
                         break;
                     }
                     int p1play = Integer.parseInt(p1);
@@ -89,7 +89,7 @@ public class TicTacToeServer implements Runnable {
 
                     String p2 = reader2.readLine();
                     if (p2 == null) {
-//                        serverUp = false;
+                        playerLeft();
                         break;
                     }
                     int p2play = Integer.parseInt(p2);
@@ -176,5 +176,11 @@ public class TicTacToeServer implements Runnable {
         }
 
         return false;
+    }
+    private void playerLeft() {
+        writer1.println('L');
+        writer1.flush();
+        writer2.println('L');
+        writer2.flush();
     }
 }

@@ -90,8 +90,10 @@ public class TicTacToe {
         }
         if (ans == null) {
             return;
-//            closeServer();
-//            System.exit(0);
+        }
+        if (ans.charAt(0) == 'L') {
+            notifyUser("Your opponent left the game :(");
+            resetGame();
         }
         iAmPlaying = true;
 
