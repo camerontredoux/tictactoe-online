@@ -4,7 +4,6 @@ import java.util.Scanner;
 
 public class TicTacToe {
     private char status = '\0';
-    private char possibleStatus[] = {'X', 'O'};
     private char gameStatus[] = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
     private boolean gameReady = false;
     private Socket socket = null;
@@ -16,8 +15,8 @@ public class TicTacToe {
 
     public TicTacToe() {
         Scanner scanner;
-        gameReady = true;
-        while (gameReady) {
+        gameReady = false;
+        while (true) {
             System.out.println(printGame());
             scanner = new Scanner(System.in);
             if (scanner.hasNextLine()) {
@@ -27,43 +26,49 @@ public class TicTacToe {
                         startServer();
                     }
                     if (read.equals("connect")) {
-                        // connect to server
                         connect();
                     }
                     if (read.matches(".*\\d.*")) {
                         sendPlay(Integer.parseInt(read));
+                        gameReady = true;
                     }
                     if (read.equals("done")) {
                         serverThread.interrupt();
+                        try {
+                            socket.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                         break;
                         //gameReady = false;
                     }
                 }
             }
-        }
-    }
 
-    private void connect() {
-        connect("127.0.0.1", 5000);
-    }
-
-    private void connect(String addr, int port) {
-        if (socket == null) {
-            try {
-                socket = new Socket(addr, port);
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (gameReady) {
+                updateGame();
             }
         }
-        determineStatus();
     }
+
+    private void updateGame() {
+        String ans = null;
+        try {
+            ans = reader.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("[Client " + status + "] received " + ans);
+    }
+
     private void sendPlay(int n) {
         if (n < 1 || n > 9) {
-            System.out.println("Invalid play from " + status + " of " + n);
+            System.err.println("Invalid play from " + status + " of " + n);
             return;
         }
-        writer.println("played: " + n);
+        writer.println(n);
         writer.flush();
+        gameStatus[n-1] = status;
         System.out.println("Received play from " + status + " as " + n);
     }
 
@@ -77,7 +82,6 @@ public class TicTacToe {
         return game;
     }
     private void determineStatus() {
-//        status = possibleStatus[(int) Math.round(Math.random())];
         try {
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             writer = new PrintWriter(new BufferedOutputStream(socket.getOutputStream()));
@@ -86,9 +90,7 @@ public class TicTacToe {
         }
         while (true) {
             try {
-                System.out.println("Trying");
                 String ans = reader.readLine();
-                System.out.println("Trying succeeded");
                 char myStatus = ans.charAt(0);
                 if (!(myStatus == 'X' || myStatus == 'O')) {
                     continue;
@@ -100,7 +102,7 @@ public class TicTacToe {
                 e.printStackTrace();
             }
         }
-        gameReady = true;
+//        gameReady = true;
     }
     private String printGame() {
         String game = "";
@@ -121,6 +123,21 @@ public class TicTacToe {
         serverThread = new Thread(new TicTacToeServer());
         serverThread.start();
         System.out.println("Starting server");
+    }
+
+    private void connect() {
+        connect("127.0.0.1", 5000);
+    }
+
+    private void connect(String addr, int port) {
+        if (socket == null) {
+            try {
+                socket = new Socket(addr, port);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        determineStatus();
     }
 
     public static void main(String[] args) {

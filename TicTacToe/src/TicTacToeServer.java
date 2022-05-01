@@ -4,6 +4,10 @@ import java.net.Socket;
 
 public class TicTacToeServer implements Runnable {
 
+    private char possibleStatus[] = {'X', 'o'};
+    private char p1status = ' ';
+    private char p2status = ' ';
+
     private ServerSocket serverSocket;
     private Socket socket1;
     private Socket socket2;
@@ -52,25 +56,34 @@ public class TicTacToeServer implements Runnable {
             e.printStackTrace();
         }
 
-        writer1.println('X');
+        p1status = possibleStatus[(int) Math.round(Math.random())];
+        p2status = (p1status == 'X' ? 'O' : 'X');
+        writer1.println(p1status);
         writer1.flush();
-        writer2.println('O');
+        writer2.println(p2status);
         writer2.flush();
         //gameplay updates
         while (running) {
             try {
-                if (reader1.ready()) {
-                    writer2.println(reader1.readLine());
-                    writer2.flush();
-                }
-                if (reader2.ready()) {
-                    writer1.println(reader2.readLine());
-                    writer1.flush();
-                }
+                writer2.println(reader1.readLine());
+                writer2.flush();
+
+                writer1.println(reader2.readLine());
+                writer1.flush();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
+    }
+
+    private void printoutW1(String in) {
+        writer1.println(in);
+        writer1.flush();
+    }
+    private void printoutW2(String in) {
+        writer2.println(in);
+        writer2.flush();
     }
 }
