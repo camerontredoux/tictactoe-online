@@ -53,15 +53,19 @@ public class TicTacToeServer implements Runnable {
         }
 
         writer1.println('X');
+        writer1.flush();
         writer2.println('O');
+        writer2.flush();
         //gameplay updates
         while (running) {
             try {
                 if (reader1.ready()) {
                     writer2.println(reader1.readLine());
+                    writer2.flush();
                 }
                 if (reader2.ready()) {
                     writer1.println(reader2.readLine());
+                    writer1.flush();
                 }
             } catch (IOException e) {
                 e.printStackTrace();

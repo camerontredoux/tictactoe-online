@@ -63,6 +63,7 @@ public class TicTacToe {
             return;
         }
         writer.println("played: " + n);
+        writer.flush();
         System.out.println("Received play from " + status + " as " + n);
     }
 
@@ -86,11 +87,10 @@ public class TicTacToe {
         while (true) {
             try {
                 System.out.println("Trying");
-                if (!reader.ready()) break;
-                System.out.println("Trying succeeded");
                 String ans = reader.readLine();
+                System.out.println("Trying succeeded");
                 char myStatus = ans.charAt(0);
-                if (myStatus != 'X' && myStatus != 'O') {
+                if (!(myStatus == 'X' || myStatus == 'O')) {
                     continue;
                 }
                 System.out.println("Found status " + ans);
