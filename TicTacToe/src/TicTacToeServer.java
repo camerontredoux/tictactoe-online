@@ -28,7 +28,6 @@ public class TicTacToeServer implements Runnable {
 
     @Override
     public void run() {
-        //gameplay updates
         boolean serverUp = true;
         while (serverUp) { // lifetime of server
             boolean running = false;
@@ -36,19 +35,19 @@ public class TicTacToeServer implements Runnable {
                 try {
                     if (socket1 == null) {
                         socket1 = serverSocket.accept();
-                        System.out.println("Player 1 accepts " + socket1);
+                        System.err.println("Player 1 accepts " + socket1);
 
                     }
                     if (socket2 == null) {
                         socket2 = serverSocket.accept();
-                        System.out.println("Player 2 accepts " + socket2);
+                        System.err.println("Player 2 accepts " + socket2);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 if (socket1 != null && socket2 != null) {
                     running = true;
-                    System.out.println("server> Found 2 players");
+                    System.err.println("server> Found 2 players");
                 }
             }
 
@@ -172,14 +171,5 @@ public class TicTacToeServer implements Runnable {
         }
 
         return false;
-    }
-
-    private void printoutW1(String in) {
-        writer1.println(in);
-        writer1.flush();
-    }
-    private void printoutW2(String in) {
-        writer2.println(in);
-        writer2.flush();
     }
 }
