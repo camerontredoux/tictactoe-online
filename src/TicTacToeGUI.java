@@ -192,7 +192,6 @@ public class TicTacToeGUI extends TicTacToe {
 
         server.addActionListener(e -> {
             server.setEnabled(false);
-            //play.setEnabled(true);
             try {
                 startServer();
             } catch (IOException ex) {
@@ -226,8 +225,10 @@ public class TicTacToeGUI extends TicTacToe {
         game_quit.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         game_quit.setPreferredSize(new Dimension(80, 20));
         game_quit.addActionListener(e -> {
-            game.dispose();
+            game.setVisible(false);
+            user.setText("You are: " + System.getProperty("user.name"));
             TicTacToeGUI.frame.setVisible(true);
+            resetGame();
         });
 
         game_title = new JLabel("Tic Tac Toe Online", SwingConstants.CENTER);
@@ -259,22 +260,17 @@ public class TicTacToeGUI extends TicTacToe {
         if (gameReady) {
             redrawView();
             notifyUser("Waiting for other player...");
-            Thread.yield();
             updateGame();
-            System.out.println("Received update " + iAmPlaying); // TODO remove
             if (iAmPlaying) {
+                game.toFront();
+                game.requestFocus();
                 notifyUser("You are playing now");
             }
-//            } else {
-//                notifyUser("Waiting for other player...");
-//            }
             redrawView();
         }
     }
     private void redrawView() {
-        System.out.println(gameStatus); // TODO remove
         for (int i = 0; i < play_buttons.length; i++) {
-            //System.out.println("Updating to " + String.valueOf(gameStatus[i])); // TODO remove
             play_buttons[i].setText(String.valueOf(gameStatus[i]).toUpperCase(Locale.ROOT));
             if (Character.isDigit(gameStatus[i])) {
                 play_buttons[i].setEnabled(true);
@@ -297,28 +293,16 @@ public class TicTacToeGUI extends TicTacToe {
     protected void notifyUser(String s) {
         game.setTitle(s);
         if (s.toLowerCase(Locale.ROOT).contains("win") ||
-                s.toLowerCase(Locale.ROOT).contains("tie")) {
+                s.toLowerCase(Locale.ROOT).contains("tie") ||
+                s.toLowerCase(Locale.ROOT).contains("left")) {
             iAmPlaying = false;
-            JOptionPane.showMessageDialog(null, s);
+            JOptionPane.showMessageDialog(game, s);
         }
     }
 
     @Override
     public void resetGame() {
-        for (int i = 0; i < gameStatus.length; i++) {
-            gameStatus[i] = String.valueOf(i + 1).toCharArray()[0];   // sorry bro, java is stupid
-        }
-        status = null;
-        playsHaveBeenDone = false;
-        gameReady = false;
-        try {
-            socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        socket = null;
-        reader = null;
-        writer = null;
+        super.resetGame();
         game.setVisible(false);
         frame.setLocation(game.getLocation());
         frame.setVisible(true);

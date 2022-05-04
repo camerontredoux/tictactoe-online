@@ -99,9 +99,7 @@ public class TicTacToe {
         }
         iAmPlaying = true;
 
-        System.out.println("Answer: " + ans); // TODO remove
         if (ans.matches(".*\\d.*")) {
-            System.out.println("Received " + ans + " as " + status); // TODO remove, for testing child class
             gameStatus[Integer.parseInt(ans) - 1] = (status == 'x' ? 'o' : 'x');
         }
         if (ans.charAt(0) == 'T') {
@@ -130,7 +128,6 @@ public class TicTacToe {
             return;
         }
         gameStatus[n - 1] = status;
-        System.out.println("Played " + String.valueOf(n) + " from " + status); // TODO remove
         writer.println(n);
         writer.flush();
     }
@@ -192,6 +189,12 @@ public class TicTacToe {
         return "[player " + printStatus() + "] Choose a position to play at:\n" + game;
     }
 
+    private void printReset() {
+        for (int i = 0; i < 3; i++) {
+            System.out.println();
+        }
+    }
+
     protected void connect() {
         connect("127.0.0.1", port);
     }
@@ -208,19 +211,19 @@ public class TicTacToe {
     }
 
     public void resetGame() {
-        for (int i = 0; i < 3; i++) {
-            System.out.println();
-        }
+        printReset();
         for (int i = 0; i < gameStatus.length; i++) {
             gameStatus[i] = String.valueOf(i + 1).toCharArray()[0];   // sorry bro, java is stupid
         }
         status = null;
         playsHaveBeenDone = false;
         gameReady = false;
-        try {
-            socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (socket != null) {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         socket = null;
         reader = null;
@@ -235,8 +238,5 @@ public class TicTacToe {
                 e.printStackTrace();
             }
         }
-//        if (serverThread != null) {
-//            // serverThread.interrupt();
-//        }
     }
 }
